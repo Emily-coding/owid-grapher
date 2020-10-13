@@ -606,7 +606,6 @@ export class Grapher
     // todo: remove ifs
     @computed get startTime(): TimeBound {
         const activeTab = this.tab
-        if (activeTab === GrapherTabOption.table) return this.timelineFilter[0]
         if (activeTab === GrapherTabOption.map)
             return this.mapColumn?.maxTime ?? 1900 // always use end time for maps
         if (this.isBarChartRace) return this.endTime
