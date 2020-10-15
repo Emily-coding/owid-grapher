@@ -41,6 +41,6 @@ it("can change time and see more points", () => {
     const chart = new MapChart({ manager })
 
     expect(Object.keys(chart.series).length).toEqual(1)
-    manager.endTime = 2010
+    manager.timelineFilterEnd = 2010
     expect(Object.keys(chart.series).length).toEqual(2)
 })

@@ -121,7 +121,7 @@ import {
     ScaleType,
     EPOCH_DATE,
 } from "grapher/core/GrapherConstants"
-import { isUnboundedLeft, isUnboundedRight } from "./TimeBounds"
+import { isUnboundedLeft, isUnboundedRight, TimeBound } from "./TimeBounds"
 import { queryParamsToStr, strToQueryParams } from "utils/client/url"
 import { dsvFormat } from "d3-dsv"
 import { isObject } from "lodash"
@@ -680,7 +680,7 @@ export function findClosestTimeIndex(
 
 export function findClosestTime(
     times: Time[],
-    targetTime: Time,
+    targetTime: TimeBound,
     tolerance?: number
 ): Time | undefined {
     if (isUnboundedLeft(targetTime)) return min(times)

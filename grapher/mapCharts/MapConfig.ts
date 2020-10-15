@@ -9,7 +9,11 @@ import {
     objectWithPersistablesToObject,
     deleteRuntimeAndUnchangedProps,
 } from "grapher/persistable/Persistable"
-import { maxTimeFromJSON, maxTimeToJSON } from "grapher/utils/TimeBounds"
+import {
+    maxTimeFromJSON,
+    maxTimeToJSON,
+    TimeBound,
+} from "grapher/utils/TimeBounds"
 import { trimObject } from "grapher/utils/Util"
 
 // MapConfig holds the data and underlying logic needed by MapTab.
@@ -17,7 +21,7 @@ import { trimObject } from "grapher/utils/Util"
 // TODO: migrate database config & only pass legend props
 class MapConfigDefaults {
     @observable columnSlug?: ColumnSlug
-    @observable time?: number
+    @observable time?: TimeBound
     @observable timeTolerance?: number
     @observable hideTimeline?: true
     @observable projection: MapProjection = "World"

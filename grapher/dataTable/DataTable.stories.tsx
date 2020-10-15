@@ -25,8 +25,8 @@ export const WithTimeRange = () => {
     const manager: DataTableManager = {
         table,
     }
-    manager.startTime = 1950
-    manager.endTime = 2000
+    manager.timelineFilterStart = 1950
+    manager.timelineFilterEnd = 2000
     return <DataTable manager={manager} />
 }
 
@@ -82,8 +82,8 @@ export const FromLegacyWithTimeRange = () => {
         type: ChartTypeName.LineChart,
         tab: GrapherTabOption.chart,
     })
-    grapher.startTime = 1950
-    grapher.endTime = 2019
+    grapher.timelineFilterStart = 1950
+    grapher.timelineFilterEnd = 2019
     return <DataTable manager={grapher} />
 }
 

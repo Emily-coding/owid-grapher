@@ -17,6 +17,7 @@ import { EditorColorScaleSection } from "./EditorColorScaleSection"
 import { LegacyVariableId } from "coreTable/LegacyVariableCode"
 import { MapConfig } from "grapher/mapCharts/MapConfig"
 import { ChartDimension } from "grapher/chart/ChartDimension"
+import { timeBoundToNumber } from "grapher/utils/TimeBounds"
 
 @observer
 class VariableSection extends React.Component<{
@@ -107,7 +108,7 @@ class TimelineSection extends React.Component<{ mapConfig: MapConfig }> {
             <Section name="Timeline">
                 <NumberField
                     label="Target year"
-                    value={mapConfig.time}
+                    value={timeBoundToNumber(mapConfig.time)}
                     onValue={this.setMapTime}
                     allowNegative
                 />

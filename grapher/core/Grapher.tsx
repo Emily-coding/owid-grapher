@@ -437,7 +437,9 @@ export class Grapher
     }
 
     private filterByTime(table: OwidTable) {
-        const [startTime, endTime] = this.timelineFilter
+        // TODO handle SlopeChart tolerance
+        // TODO handle DiscreteBar tolerance
+        const { startTime, endTime } = this
         if (this.tab === GrapherTabOption.map) {
             const tolerance = this.map.timeTolerance ?? 0 // todo: is this the right place for this?
             return table.filterByTime(
@@ -603,44 +605,12 @@ export class Grapher
         return this.inputTable.getTimeOptionsForColumns(this.yColumnSlugs)
     }
 
-    // todo: remove ifs
-    @computed get startTime(): TimeBound {
-        const activeTab = this.tab
-        if (activeTab === GrapherTabOption.map)
-            return this.mapColumn?.maxTime ?? 1900 // always use end time for maps
-        if (this.isBarChartRace) return this.endTime
+    @computed get startTime(): Time {
         return findClosestTime(this.times, this.timelineFilter[0]) ?? 1900
     }
 
-    // todo: remove ifs
-    set startTime(newValue: TimeBound) {
-        if (this.tab === GrapherTabOption.map)
-            this.timelineFilter = [newValue, newValue]
-        else this.timelineFilter = [newValue, this.timelineFilter[1]]
-    }
-
-    // todo: remove ifs
-    set endTime(newValue: TimeBound) {
-        const activeTab = this.tab
-        if (
-            activeTab === GrapherTabOption.map ||
-            activeTab === GrapherTabOption.table ||
-            this.isBarChartRace
-        )
-            this.timelineFilter = [newValue, newValue]
-        else this.timelineFilter = [this.timelineFilter[0], newValue]
-    }
-
-    // todo: remove ifs
-    @computed get endTime(): TimeBound {
-        const activeTab = this.tab
-        if (activeTab === GrapherTabOption.map)
-            return this.mapColumn?.maxTime ?? 2000
+    @computed get endTime(): Time {
         return findClosestTime(this.times, this.timelineFilter[1]) ?? 2000
-    }
-
-    @computed private get isBarChartRace() {
-        return this.type === ChartTypeName.LineChart && this.isPlaying
     }
 
     @computed get isNativeEmbed() {
@@ -805,16 +775,39 @@ export class Grapher
     }
 
     @computed get timelineFilter(): TimeBounds {
-        return [
-            // Handle `undefined` values in minTime/maxTime
-            minTimeFromJSON(this.minTime),
-            maxTimeFromJSON(this.maxTime),
-        ]
+        // Use `minTimeFromJSON` to handle `undefined` values.
+        if (this.primaryTab === GrapherTabOption.map) {
+            return [
+                minTimeFromJSON(this.map.time),
+                minTimeFromJSON(this.map.time),
+            ]
+        }
+        return [minTimeFromJSON(this.minTime), maxTimeFromJSON(this.maxTime)]
     }
 
     set timelineFilter(value: TimeBounds) {
-        this.minTime = value[0]
-        this.maxTime = value[1]
+        if (this.primaryTab === GrapherTabOption.map) {
+            this.map.time = value[1]
+        } else {
+            this.minTime = value[0]
+            this.maxTime = value[1]
+        }
+    }
+
+    @computed get timelineFilterStart(): TimeBound {
+        return this.timelineFilter[0]
+    }
+
+    set timelineFilterStart(start: TimeBound) {
+        this.timelineFilter = [start, this.timelineFilter[1]]
+    }
+
+    @computed get timelineFilterEnd(): TimeBound {
+        return this.timelineFilter[1]
+    }
+
+    set timelineFilterEnd(end: TimeBound) {
+        this.timelineFilter = [this.timelineFilter[0], end]
     }
 
     // Get the dimension slots appropriate for this type of chart

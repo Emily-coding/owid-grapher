@@ -3,14 +3,14 @@ import { TimeBound, TimeBoundValue } from "grapher/utils/TimeBounds"
 import { findClosestTime, last } from "grapher/utils/Util"
 
 export interface TimelineManager {
-    disablePlay?: boolean
-    formatTimeFn?: (value: any) => any
+    readonly disablePlay?: boolean
+    readonly formatTimeFn?: (value: any) => any
+    readonly times: Time[]
+    readonly msPerTick?: number
+    readonly onPlay?: () => void
     isPlaying?: boolean
-    times: Time[]
-    startTime: TimeBound
-    endTime: TimeBound
-    msPerTick?: number
-    onPlay?: () => void
+    timelineFilterStart: TimeBound
+    timelineFilterEnd: TimeBound
 }
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
@@ -27,12 +27,12 @@ export class TimelineController {
         return this.manager.times
     }
 
-    private get startTime() {
-        return findClosestTime(this.timesAsc, this.manager.startTime)!
+    get startTime() {
+        return findClosestTime(this.timesAsc, this.manager.timelineFilterStart)!
     }
 
-    private get endTime() {
-        return findClosestTime(this.timesAsc, this.manager.endTime)!
+    get endTime() {
+        return findClosestTime(this.timesAsc, this.manager.timelineFilterEnd)!
     }
 
     get minTime() {
@@ -58,7 +58,7 @@ export class TimelineController {
         if (endTime - startTime > 1) return
 
         // if handles within 1 time of each other, snap to closest time.
-        this.manager.startTime = this.manager.endTime
+        this.updateStartTime(this.endTime)
     }
 
     getNextTime(time: number) {
@@ -78,12 +78,9 @@ export class TimelineController {
     }
 
     private resetToBeginning() {
-        const { manager } = this
         const beginning =
-            manager.endTime !== manager.startTime
-                ? manager.startTime
-                : this.minTime
-        manager.endTime = beginning
+            this.endTime !== this.startTime ? this.startTime : this.minTime
+        this.updateEndTime(beginning)
     }
 
     async play(numberOfTicks?: number) {
@@ -147,8 +144,8 @@ export class TimelineController {
         const { minTime, maxTime } = this
         const closestTime = findClosestTime(this.timesAsc, time) ?? time
 
-        let startTime = this.dragOffsets[0] + closestTime
-        let endTime = this.dragOffsets[1] + closestTime
+        let startTime: TimeBound = this.dragOffsets[0] + closestTime
+        let endTime: TimeBound = this.dragOffsets[1] + closestTime
 
         if (startTime < minTime) {
             startTime = minTime
@@ -179,8 +176,8 @@ export class TimelineController {
                 : handle
 
         if (constrainedHandle !== handle) {
-            if (handle === "start") this.updateStartTime(manager.endTime)
-            else this.updateEndTime(manager.startTime)
+            if (handle === "start") this.updateStartTime(this.endTime)
+            else this.updateEndTime(this.startTime)
         }
 
         if (manager.isPlaying && !this.rangeMode) {
@@ -193,12 +190,12 @@ export class TimelineController {
         return constrainedHandle
     }
 
-    private updateStartTime(timeBound: TimeBound) {
-        this.manager.startTime = timeBound
+    private updateStartTime(time: TimeBound) {
+        this.manager.timelineFilterStart = time
     }
 
-    private updateEndTime(timeBound: TimeBound) {
-        this.manager.endTime = timeBound
+    private updateEndTime(time: TimeBound) {
+        this.manager.timelineFilterEnd = time
     }
 
     resetStartToMin() {

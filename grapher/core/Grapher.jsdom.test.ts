@@ -166,8 +166,8 @@ describe("line chart to bar chart and bar chart race", () => {
 
     it("switches from a line chart to a bar chart when there is only 1 year selected", () => {
         const grapher = new Grapher(TestGrapherConfig())
-        grapher.startTime = 2000
-        grapher.endTime = 2000
+        grapher.timelineFilterStart = 2000
+        grapher.timelineFilterEnd = 2000
         expect(grapher.constrainedType).toEqual(ChartTypeName.DiscreteBar)
     })
 

@@ -7,59 +7,43 @@ import {
 import { EPOCH_DATE } from "grapher/core/GrapherConstants"
 
 /**
- * An unbounded value (±Infinity) or a concrete point in time (year or date).
- */
-export type TimeBound = number
-
-export type TimeBounds = [TimeBound, TimeBound]
-
-/**
  * The two special TimeBound values: unbounded left & unbounded right.
  */
 export enum TimeBoundValue {
-    unboundedLeft = -Infinity,
-    unboundedRight = Infinity,
-}
-
-enum TimeBoundValueStr {
     unboundedLeft = "earliest",
     unboundedRight = "latest",
 }
 
-export function isUnbounded(time: TimeBound): time is TimeBoundValue {
+/**
+ * An unbounded value ("earliest" or "latest") or a concrete point in time (year or date).
+ */
+export type TimeBound = number | TimeBoundValue
+
+export type TimeBounds = [TimeBound, TimeBound]
+
+export function isUnbounded(time: TimeBound | string): time is TimeBoundValue {
     return isUnboundedLeft(time) || isUnboundedRight(time)
 }
 
-export function isUnboundedLeft(time: TimeBound): time is TimeBoundValue {
+export function isUnboundedLeft(
+    time: TimeBound | string
+): time is TimeBoundValue.unboundedLeft {
     return time === TimeBoundValue.unboundedLeft
 }
 
-export function isUnboundedRight(time: TimeBound): time is TimeBoundValue {
+export function isUnboundedRight(
+    time: TimeBound | string
+): time is TimeBoundValue.unboundedRight {
     return time === TimeBoundValue.unboundedRight
 }
 
-export function formatTimeBound(time: TimeBound): string {
-    if (isUnboundedLeft(time)) {
-        return TimeBoundValueStr.unboundedLeft
-    }
-    if (isUnboundedRight(time)) {
-        return TimeBoundValueStr.unboundedRight
-    }
-    return `${time}`
+export function formatTimeBound(t: TimeBound): string {
+    return `${t}`
 }
 
-export function parseTimeBound(
-    str: string,
-    defaultTo: TimeBoundValue
-): TimeBound {
-    if (str === TimeBoundValueStr.unboundedLeft)
-        return TimeBoundValue.unboundedLeft
-
-    if (str === TimeBoundValueStr.unboundedRight)
-        return TimeBoundValue.unboundedRight
-
-    const time = parseIntOrUndefined(str)
-    return time !== undefined ? time : defaultTo
+export function parseTimeBound(str: string, defaultTo: TimeBound): TimeBound {
+    if (isUnbounded(str)) return str
+    return parseIntOrUndefined(str) ?? defaultTo
 }
 
 // Use this to not repeat logic
@@ -72,17 +56,8 @@ function fromJSON(
     return value
 }
 
-function toJSON(bound: TimeBound | undefined): string | number | undefined {
-    if (bound === undefined) {
-        return undefined
-    }
-    if (isUnboundedLeft(bound)) {
-        return TimeBoundValueStr.unboundedLeft
-    }
-    if (isUnboundedRight(bound)) {
-        return TimeBoundValueStr.unboundedRight
-    }
-    return bound
+function toJSON(time: TimeBound | undefined): string | number | undefined {
+    return time
 }
 
 export function minTimeFromJSON(
@@ -134,7 +109,7 @@ const upgradeLegacyTimeString = (time: string) => {
         : time
 }
 
-export function getTimeDomainFromQueryString(time: string): [number, number] {
+export function getTimeDomainFromQueryString(time: string): TimeBounds {
     time = upgradeLegacyTimeString(time)
 
     const reIntComponent = new RegExp("\\-?\\d+")
@@ -154,4 +129,17 @@ export function getTimeDomainFromQueryString(time: string): [number, number] {
 
     const t = parseTimeURIComponent(time, TimeBoundValue.unboundedRight)
     return [t, t]
+}
+
+/**
+ * Strictly convert to number, using ±Infinsity for "earliest" and "latest".
+ * Helpful for Admin forms, where the value must be a number.
+ */
+export function timeBoundToNumber(
+    time: TimeBound | undefined
+): number | undefined {
+    if (time === undefined) return undefined
+    if (isUnboundedLeft(time)) return -Infinity
+    if (isUnboundedRight(time)) return Infinity
+    return time
 }

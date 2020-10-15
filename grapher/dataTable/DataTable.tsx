@@ -25,6 +25,7 @@ import { Tippy } from "grapher/chart/Tippy"
 import { OwidTable } from "coreTable/OwidTable"
 import { CoreColumn } from "coreTable/CoreTableColumns"
 import { Bounds, DEFAULT_BOUNDS } from "grapher/utils/Bounds"
+import { TimeBound } from "grapher/utils/TimeBounds"
 
 interface DataTableState {
     sort: DataTableSortState
@@ -59,8 +60,10 @@ const inverseSortOrder = (order: SortOrder) =>
 
 export interface DataTableManager {
     table: OwidTable
-    endTime?: Time
-    startTime?: Time
+    readonly endTime?: Time
+    readonly startTime?: Time
+    timelineFilterStart?: TimeBound
+    timelineFilterEnd?: TimeBound
     minPopulationFilter?: number
     dataTableColumnSlugsToShow?: ColumnSlug[]
 }

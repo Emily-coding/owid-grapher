@@ -66,7 +66,7 @@ export class TimelineComponent extends React.Component<{
 
         if (this.dragTarget === "start") this.lastUpdatedTooltip = "startMarker"
         if (this.dragTarget === "end") this.lastUpdatedTooltip = "endMarker"
-        if (this.manager.startTime > this.manager.endTime)
+        if (this.controller.startTime > this.controller.endTime)
             this.lastUpdatedTooltip =
                 this.lastUpdatedTooltip === "startMarker"
                     ? "endMarker"
@@ -78,7 +78,7 @@ export class TimelineComponent extends React.Component<{
         isStartMarker: boolean,
         isEndMarker: boolean
     ) {
-        const { startTime, endTime } = this.manager
+        const { startTime, endTime } = this.controller
 
         if (startTime === endTime && (isStartMarker || isEndMarker))
             return "both"
@@ -246,8 +246,12 @@ export class TimelineComponent extends React.Component<{
 
     render() {
         const { manager, controller } = this
-        const { startTimeProgress, endTimeProgress } = controller
-        const { startTime, endTime } = manager
+        const {
+            startTime,
+            endTime,
+            startTimeProgress,
+            endTimeProgress,
+        } = controller
 
         return (
             <div

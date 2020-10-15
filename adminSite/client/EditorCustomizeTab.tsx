@@ -20,6 +20,7 @@ import { faMinus } from "@fortawesome/free-solid-svg-icons/faMinus"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { ColorSchemeDropdown, ColorSchemeOption } from "./ColorSchemeDropdown"
 import { EditorColorScaleSection } from "./EditorColorScaleSection"
+import { timeBoundToNumber } from "grapher/utils/TimeBounds"
 
 @observer
 class ColorSchemeSelector extends React.Component<{ grapher: Grapher }> {
@@ -128,7 +129,7 @@ class TimelineSection extends React.Component<{ editor: ChartEditor }> {
                     {features.timeDomain && (
                         <NumberField
                             label="Selection start"
-                            value={grapher.minTime}
+                            value={timeBoundToNumber(grapher.minTime)}
                             onValue={debounce(this.onMinTime)}
                             allowNegative
                         />
@@ -139,7 +140,7 @@ class TimelineSection extends React.Component<{ editor: ChartEditor }> {
                                 ? "Selection end"
                                 : "Selected year"
                         }
-                        value={grapher.maxTime}
+                        value={timeBoundToNumber(grapher.maxTime)}
                         onValue={debounce(this.onMaxTime)}
                         allowNegative
                     />

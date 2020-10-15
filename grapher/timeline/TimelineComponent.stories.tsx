@@ -15,6 +15,9 @@ class TimelineManager {
     @computed get endTime() {
         return this._endTime
     }
+    @computed get timelineFilterEnd() {
+        return this.endTime
+    }
 
     @action.bound updateEndTime(num: number) {
         this._endTime = num
@@ -26,6 +29,9 @@ class TimelineManager {
     }
     @computed get startTime() {
         return this._startTime
+    }
+    @computed get timelineFilterStart() {
+        return this.startTime
     }
 
     @action.bound updateStartTime(num: number) {

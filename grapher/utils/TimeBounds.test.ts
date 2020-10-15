@@ -102,8 +102,8 @@ describe(maxTimeToJSON, () => {
 describe(getTimeDomainFromQueryString, () => {
     it("can handle both unbounded", () => {
         expect(getTimeDomainFromQueryString("..")).toEqual([
-            -Infinity,
-            Infinity,
+            "earliest",
+            "latest",
         ])
     })
 })
