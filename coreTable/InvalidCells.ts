@@ -21,6 +21,7 @@ class BlankButShouldBeNumber extends InvalidCell {}
 class UndefinedButShouldBeString extends InvalidCell {}
 class NullButShouldBeString extends InvalidCell {}
 class NotAParseableNumberButShouldBeNumber extends InvalidCell {}
+class NoValueWithinTolerance extends InvalidCell {}
 
 export const InvalidCellTypes = {
     NaNButShouldBeNumber: new NaNButShouldBeNumber(),
@@ -32,4 +33,5 @@ export const InvalidCellTypes = {
     UndefinedButShouldBeString: new UndefinedButShouldBeString(),
     NullButShouldBeString: new NullButShouldBeString(),
     NotAParseableNumberButShouldBeNumber: new NotAParseableNumberButShouldBeNumber(),
+    NoValueWithinTolerance: new NoValueWithinTolerance(),
 }

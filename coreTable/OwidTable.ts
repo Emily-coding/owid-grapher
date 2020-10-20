@@ -40,7 +40,7 @@ import {
     RequiredColumnDefs,
 } from "./OwidTableConstants"
 import { legacyToOwidTable, makeAnnotationsSlug } from "./LegacyToOwidTable"
-import { InvalidCell } from "./InvalidCells"
+import { InvalidCell, InvalidCellTypes } from "./InvalidCells"
 import {
     AlignedTextTableOptions,
     toAlignedTextTable,
@@ -569,7 +569,10 @@ export class OwidTable extends CoreTable<OwidRow, OwidColumnDef> {
                     const timeRowIndex = originalIndexes[i]
                     return {
                         ...row,
-                        [columnSlug]: values[i],
+                        [columnSlug]:
+                            values[i] !== undefined
+                                ? values[i]
+                                : InvalidCellTypes.NoValueWithinTolerance,
                         [newColumnTimeSlug]:
                             timeRowIndex !== undefined
                                 ? rows[timeRowIndex][timeColumnSlug]
