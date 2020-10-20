@@ -430,3 +430,44 @@ describe("time domain", () => {
         expect(table.get("gdp")!.uniqTimesAsc).toEqual([1950, 1970, 2000])
     })
 })
+
+describe("tolerance", () => {
+    it("can apply tolerance to a column", () => {
+        const table = OwidTable.fromDelimited(
+            `gdp,year,entityName,entityId,entityCode
+,2000,usa,,
+0,2001,usa,,
+,2002,usa,,
+,2003,usa,,
+,2004,usa,,
+1,2005,usa,,`,
+            [
+                { slug: "gdp", type: ColumnTypeNames.Numeric },
+                { slug: "year", type: ColumnTypeNames.Year },
+            ]
+        )
+
+        const toleranceTable = table.fillColumnWithTolerance("gdp", 1)
+
+        expect(toleranceTable.rows[0]).toMatchObject({
+            gdp: 0,
+            gdpOriginalTime: 2001,
+        })
+        expect(toleranceTable.rows[2]).toMatchObject({
+            gdp: 0,
+            gdpOriginalTime: 2001,
+        })
+        expect(toleranceTable.rows[3]).toMatchObject({
+            gdp: undefined,
+            gdpOriginalTime: undefined,
+        })
+        expect(toleranceTable.rows[3]).toMatchObject({
+            gdp: undefined,
+            gdpOriginalTime: undefined,
+        })
+        expect(toleranceTable.rows[4]).toMatchObject({
+            gdp: 1,
+            gdpOriginalTime: 2005,
+        })
+    })
+})

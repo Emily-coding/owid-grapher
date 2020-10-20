@@ -31,6 +31,7 @@ import {
     findClosestTimeIndex,
     trimArray,
     getDropIndexes,
+    fillUndefinedWithClosest,
 } from "grapher/utils/Util"
 import { strToQueryParams } from "utils/client/url"
 import { SortOrder } from "coreTable/CoreTableConstants"
@@ -373,8 +374,8 @@ describe("jsTables", () => {
 
     it("handles extra blank cells", () => {
         const table = toJsTable(
-            parseDelimited(`gdp pop code    
-123 345 usa    
+            parseDelimited(`gdp pop code
+123 345 usa
 `)
         )
         expect(jsTableToDelimited(trimGrid(table!) as JsTable, " "))
@@ -552,5 +553,53 @@ describe(sortNumeric, () => {
                 (o) => o.a
             )
         ).toEqual([{ a: 1 }, { a: 2 }, { a: 3 }, { a: 3 }, { a: 4 }, { a: 8 }])
+    })
+})
+
+describe(fillUndefinedWithClosest, () => {
+    it("handles empty array", () => {
+        expect(fillUndefinedWithClosest([], 2).values).toEqual([])
+    })
+
+    it("leaves array unchanged if tolerance = 0", () => {
+        expect(
+            fillUndefinedWithClosest([1, undefined, undefined, 3], 0).values
+        ).toEqual([1, undefined, undefined, 3])
+    })
+
+    it("fills in simple case", () => {
+        const { values, originalIndexes } = fillUndefinedWithClosest(
+            [1, undefined, undefined, 3],
+            1
+        )
+        expect(values).toEqual([1, 1, 3, 3])
+        expect(originalIndexes).toEqual([undefined, 0, 3, undefined])
+    })
+
+    it("fills in initial and trailing values", () => {
+        const { values, originalIndexes } = fillUndefinedWithClosest(
+            [
+                undefined,
+                undefined,
+                1,
+                undefined,
+                undefined,
+                undefined,
+                3,
+                undefined,
+            ],
+            1
+        )
+        expect(values).toEqual([undefined, 1, 1, 1, undefined, 3, 3, 3])
+        expect(originalIndexes).toEqual([
+            undefined,
+            2,
+            undefined,
+            2,
+            undefined,
+            6,
+            undefined,
+            6,
+        ])
     })
 })

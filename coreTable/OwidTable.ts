@@ -16,6 +16,8 @@ import {
     sortBy,
     sortedIndexBy,
     last,
+    groupBy,
+    fillUndefinedWithClosest,
 } from "grapher/utils/Util"
 import { computed, action } from "mobx"
 import {
@@ -541,6 +543,51 @@ export class OwidTable extends CoreTable<OwidRow, OwidColumnDef> {
         return intersectionOfSets<EntityName>(
             columnSlugs.map((slug) => new Set(this.get(slug)!.uniqEntityNames))
         )
+    }
+
+    fillColumnWithTolerance(columnSlug: ColumnSlug, tolerance: number) {
+        const columnDef = this.get(columnSlug)?.def as OwidColumnDef
+        const timeColumnSlug = columnDef.isDailyMeasurement
+            ? OwidTableSlugs.day
+            : OwidTableSlugs.year
+        const timeColumnDef = this.get(timeColumnSlug)?.def as OwidColumnDef
+        const newColumnTimeSlug = `${columnSlug}OriginalTime`
+
+        const rows = flatten(
+            Object.values(
+                groupBy(this.sortedByTime.rows, (row) => row.entityId)
+            ).map((rows) => {
+                const { values, originalIndexes } = fillUndefinedWithClosest(
+                    rows
+                        .map((row) => row[columnSlug])
+                        .map((value) =>
+                            value instanceof InvalidCell ? undefined : value
+                        ),
+                    tolerance
+                )
+                return rows.map((row, i) => {
+                    const timeRowIndex = originalIndexes[i]
+                    return {
+                        ...row,
+                        [columnSlug]: values[i],
+                        [newColumnTimeSlug]:
+                            timeRowIndex !== undefined
+                                ? rows[timeRowIndex][timeColumnSlug]
+                                : undefined,
+                    } as OwidRow
+                })
+            })
+        )
+
+        const defs: OwidColumnDef[] = [
+            ...this.defs,
+            {
+                ...timeColumnDef,
+                slug: newColumnTimeSlug,
+            },
+        ]
+
+        return this.transform(rows, defs, `Tolerance`, TransformType.UpdateRows)
     }
 
     // This takes both the Variables and Dimensions data and generates an OwidTable.

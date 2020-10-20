@@ -1145,3 +1145,33 @@ export function sortNumeric<T>(
 // A predicate for filtering an array of nulls and undefineds that returns the correct type
 export const isPresent = <T>(t: T | undefined | null | void): t is T =>
     t !== undefined && t !== null
+
+export function fillUndefinedWithClosest<T>(
+    array: (T | undefined)[],
+    tolerance: number
+): { values: (T | undefined)[]; originalIndexes: (number | undefined)[] } {
+    if (!array.length) return { values: [], originalIndexes: [] }
+
+    const values = new Array<T | undefined>(array.length)
+    const originalIndexes = new Array<number | undefined>(array.length)
+
+    for (let i = 0; i < array.length; i++) {
+        if (array[i] !== undefined) {
+            values[i] = array[i]
+            continue
+        }
+        for (let Δ = 1; Δ <= tolerance; Δ++) {
+            if (i + Δ < array.length && array[i + Δ] !== undefined) {
+                values[i] = array[i + Δ]
+                originalIndexes[i] = i + Δ
+                break
+            }
+            if (i - Δ >= 0 && array[i - Δ] !== undefined) {
+                values[i] = array[i - Δ]
+                originalIndexes[i] = i - Δ
+                break
+            }
+        }
+    }
+    return { values, originalIndexes }
+}
